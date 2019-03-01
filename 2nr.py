@@ -28,57 +28,62 @@ def getMessage():
   return str(code[0])
 
 def restartApk():
-  d.press.home()
-  device.shell("pm clear pl.rs.sip.softphone")
-  device.shell("monkey -p pl.rs.sip.softphone -c android.intent.category.LAUNCHER 1")
-  if d(text='Wykryto nakładkę ekranową').exists:
-      print('Wykryto nakładkę ekranową')
-      d.press.home()
-      device.shell("pm clear pl.rs.sip.softphone")
-      device.shell("monkey -p pl.rs.sip.softphone -c android.intent.category.LAUNCHER 1")
-  device.shell("input tap 900 1100")
-  time.sleep(1)
-  device.shell("input tap 900 1100")
-  time.sleep(1)
-  device.shell("input tap 900 1100")
-  time.sleep(1)
-  device.shell("input tap 900 1100")
-  time.sleep(5)
-  d.press.back()
-  print("Aplikacja uruchomiona")
+    d.press.home()
+    device.shell("pm clear pl.rs.sip.softphone")
+    device.shell("monkey -p pl.rs.sip.softphone -c android.intent.category.LAUNCHER 1")
+    if d(text='Wykryto nakładkę ekranową').exists:
+        print('Wykryto nakładkę ekranową')
+        d.press.home()
+        device.shell("pm clear pl.rs.sip.softphone")
+        device.shell("monkey -p pl.rs.sip.softphone -c android.intent.category.LAUNCHER 1")
+    d(resourceId="com.android.packageinstaller:id/permission_allow_button").click()
+    time.sleep(1)  
+    d(resourceId="com.android.packageinstaller:id/permission_allow_button").click()
+    time.sleep(1)  
+    d(resourceId="com.android.packageinstaller:id/permission_allow_button").click()
+    time.sleep(1)  
+    d(text="Autostart").wait.exists(timeout=10)
+    d.press.back()
+    d(text="OK").click()
+    d(text="Pomiń prezentację").click()
+    d(text="Akceptuję").click()
+    time.sleep(1)
+    d.press.back()
+    print("Aplikacja uruchomiona")
 
 
 client = AdbClient(host="127.0.0.1", port=5037)
 devices = client.devices()
 device=devices[0]
 
+#print(d.dump())
+
 restartApk()
 nrDone=False
 while nrDone==False:
-  nrOK=False
-  while nrOK==False:
-    if (d(text="Problem").exists) or (d(text="Losuj").exists):
-      print("NO JEST PROBLEM")
-      d(resourceId="pl.rs.sip.softphone:id/btnGetNumber").click()
-      print("Kliknalem refresh")
-      time.sleep(2)
-      nrOK=False
-    if not ((d(text="Problem").exists) or (d(text="Losuj").exists)):
-      print("NO NIE MA PROBLEMA")
-      nrOK=True
-
-  print("Numer się pojawił")
-  createNr()
-  time.sleep(2)
-  if(d(resourceId="android:id/button1").exists):
-    print("Wystapil problem")
-    print("Restartuje apke")
-    restartApk()
-  else:
-    print("Wsystko sie udao")
-    nrDone=True
+    nrOK=False
+    while nrOK==False:
+        if (d(text="Problem").exists) or (d(text="Losuj").exists):
+            print("Problem/Losuj")
+            d(resourceId="pl.rs.sip.softphone:id/btnGetNumber").click()
+            print("Kliknalem refresh")
+            time.sleep(2)
+            nrOK=False
+        else:
+            print("Jest Nr")
+            nrOK=True
+    createNr()
+    time.sleep(2)
+    if(d(resourceId="android:id/button1").exists):
+        print("Wystapil problem")
+        print("Restartuje apke")
+        restartApk()
+        nrDone=False
+    else:
+        print("Wsystko sie udao")
+        nrDone=True
 
 tel=getPhoneNrAsString()
 print(tel)
-
+#
 # getMessage()
